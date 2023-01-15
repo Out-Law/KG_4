@@ -52,4 +52,23 @@ class CanvasPainter extends CustomPainter {
 
     canvas.drawPoints(PointMode.points, points, paint);
   }
+
+  void drawRectangle(Canvas canvas, Size size, ) {
+    final paint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+    final width = size.width;
+    final height = size.height;
+
+   /* for(double i = widget.topLeft.dx; i < widget.topLeft.dx + widget.width; i++){
+      widget.points?.add(Offset(i, widget.topLeft.dy));
+      widget.points?.add(Offset(i, widget.topLeft.dy+widget.height));
+    }
+    for(double i = widget.topLeft.dy; i < widget.topLeft.dy + widget.height; i++){
+      widget.points?.add(Offset(widget.topLeft.dx, i));
+      widget.points?.add(Offset(widget.topLeft.dx+widget.width, i));
+    }*/
+  }
+
 }
