@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 
 import 'canvas.dart';
@@ -28,15 +29,39 @@ class _UiState extends State<Ui> {
   Widget upColumn(){
     return Column(
       children: [
-        Container(
-            width: 800,
-            height: 500,
-            decoration: BoxDecoration(
-              color: Colors.white,
-                border: Border.all(color: Colors.blueAccent)
+        Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+                width: 800,
+                height: 500,
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.blueAccent)
+                ),
+                child: const CanvasWidget()
             ),
-            child: const CanvasWidget()
+
+                 RotatedBox(
+              quarterTurns: 1,
+              child: SizedBox(
+                width: 500,
+                child: Slider(
+                  label: "Select Age",
+                  value: age.toDouble(),
+                  onChanged: (value) {
+                    setState(() {
+                      age = value.toInt();
+                    });
+                  },
+                  min: 5,
+                  max: 100,
+                ),
+              ),
+            ),
+          ]
         ),
+
         SizedBox(
           width: 800,
           child: Slider(
@@ -51,20 +76,52 @@ class _UiState extends State<Ui> {
             max: 100,
           ),
         ),
+
+        SizedBox(
+          height: 16,
+        ),
+
+        const TextField(decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: "Размер",
+            fillColor: Colors.black12,
+            filled: true
+        )),
+
+        SizedBox(
+          height: 16,
+        ),
+
+        Container(
+          height: 4,
+          color: Colors.black,
+        ),
+
+        SizedBox(
+          height: 16,
+        ),
       ],
     );
   }
 
-  Widget downColumn(){
+  Widget  downColumn(){
     return Column(
       children: [
         Row(
           children: <Widget>[
+            Checkbox(
+              value: valueS,
+              onChanged: (bool? value) {
+                setState(() {
+                  valueS = value!;
+                });
+              },
+            ),
             const SizedBox(
               width: 10,
             ), //SizedBox
             const Text(
-              'Library Implementation Of Searching Algorithm: ',
+              '1 - Прямоугольник',
               style: TextStyle(fontSize: 17.0),
             ), //Text
             const SizedBox(width: 10), //SizedBox
@@ -75,9 +132,133 @@ class _UiState extends State<Ui> {
                   valueS = value!;
                 });
               },
-            ), //Checkbox
-          ], //<Widget>[]
+            ),
+
+            ///
+
+            const SizedBox(
+              width: 10,
+            ), //SizedBox
+            const Text(
+              '2 - Прямоугольник',
+              style: TextStyle(fontSize: 17.0),
+            ), //Text
+            const SizedBox(width: 10), //SizedBox
+            Checkbox(
+              value: valueS,
+              onChanged: (bool? value) {
+                setState(() {
+                  valueS = value!;
+                });
+              },
+            ),
+
+            ///
+
+            const SizedBox(
+              width: 10,
+            ),
+            const Text(
+              '3 - Прямоугольник',
+              style: TextStyle(fontSize: 17.0),
+            ),
+          ],
         ),
+        const SizedBox(width: 10),
+        Row(
+          children: <Widget>[
+            Checkbox(
+              value: valueS,
+              onChanged: (bool? value) {
+                setState(() {
+                  valueS = value!;
+                });
+              },
+            ),
+            const SizedBox(
+              width: 10,
+            ), //SizedBox
+            const Text(
+              '1 - Прямоугольник',
+              style: TextStyle(fontSize: 17.0),
+            ), //Text
+            const SizedBox(width: 10), //SizedBox
+            Checkbox(
+              value: valueS,
+              onChanged: (bool? value) {
+                setState(() {
+                  valueS = value!;
+                });
+              },
+            ),
+
+            ///
+
+            const SizedBox(
+              width: 10,
+            ), //SizedBox
+            const Text(
+              '2 - Прямоугольник',
+              style: TextStyle(fontSize: 17.0),
+            ), //Text
+            const SizedBox(width: 10), //SizedBox
+            Checkbox(
+              value: valueS,
+              onChanged: (bool? value) {
+                setState(() {
+                  valueS = value!;
+                });
+              },
+            ),
+
+            ///
+
+            const SizedBox(
+              width: 10,
+            ), //SizedBox
+            const Text(
+              '2 - Прямоугольник',
+              style: TextStyle(fontSize: 17.0),
+            ), //Text
+            const SizedBox(width: 10), //SizedBox
+            Checkbox(
+              value: valueS,
+              onChanged: (bool? value) {
+                setState(() {
+                  valueS = value!;
+                });
+              },
+            ),
+
+            ///
+
+            const SizedBox(
+              width: 10,
+            ),
+            const Text(
+              '3 - Прямоугольник',
+              style: TextStyle(fontSize: 17.0),
+            ),
+          ],
+        ),
+
+        const TextField(decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: "Размер",
+            fillColor: Colors.black12,
+            filled: true
+        )),
+
+        const SizedBox(
+          height: 10,
+        ),
+
+        const TextField(decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: "Размер",
+            fillColor: Colors.black12,
+            filled: true
+        )),
       ],
     );
   }
