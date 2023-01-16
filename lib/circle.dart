@@ -67,11 +67,10 @@ class Arc {
 
 class Circle {
   int? radius;
-  Offset? offset;
   Offset? center;
   final List<Arc> arcs = <Arc>[];
 
-  Circle({this.radius, this.offset});
+  Circle({this.radius, this.center});
 
   // void Clear()
   // {
@@ -85,11 +84,11 @@ class Circle {
 
   //изменить координату
   void setOffset(Offset Offset) {
-    offset = Offset;
+    center = Offset;
   }
 
   Offset setCenter() {
-    return Offset(offset!.dx + radius!, offset!.dx + radius!);
+    return Offset(center!.dx + radius!, center!.dx + radius!);
   }
 
   //получить радиус
@@ -99,11 +98,11 @@ class Circle {
 
   //получить координату
   Offset getOffset() {
-    return offset!;
+    return center!;
   }
 
   void addArc(Offset start, Offset end, bool mode) {
-    arcs.add(Arc.angle(start, end, offset!, radius!, mode));
+    arcs.add(Arc.angle(start, end, center!, radius!, mode));
   }
 
   void addArcAllCircle() {
