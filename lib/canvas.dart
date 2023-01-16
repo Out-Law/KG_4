@@ -8,7 +8,18 @@ import 'circle.dart';
 class CanvasWidget extends StatefulWidget {
   Offset CircleOne = const Offset(0, 0);
   Offset CircleTwo = const Offset(0, 0);
-  CanvasWidget({Key? key, required this.CircleOne, required this.CircleTwo}) : super(key: key);
+
+  Offset RectangleOne = const Offset(0, 0);
+  Offset RectangleTwo = const Offset(0, 0);
+  Offset RectangleThree = const Offset(0, 0);
+
+  CanvasWidget({Key? key,
+    required this.CircleOne,
+    required this.CircleTwo,
+    required this.RectangleOne,
+    required this.RectangleTwo,
+    required this.RectangleThree
+  }) : super(key: key);
 
   @override
   _CanvasWidgetState createState() => _CanvasWidgetState();
@@ -20,7 +31,13 @@ class _CanvasWidgetState extends State<CanvasWidget> {
   Widget build(BuildContext context) {
     return CustomPaint(
       willChange: true,
-      painter: CanvasPainter(widget.CircleOne, widget.CircleTwo),
+      painter: CanvasPainter(
+          widget.CircleOne,
+          widget.CircleTwo,
+          widget.RectangleOne,
+          widget.RectangleTwo,
+          widget.RectangleThree
+      ),
     );
   }
 }
@@ -30,16 +47,26 @@ class CanvasPainter extends CustomPainter {
   List<Offset> pointsCircle = <Offset>[];
   Offset CircleOne = const Offset(0, 0);
   Offset CircleTwo = const Offset(0, 0);
-  CanvasPainter(this.CircleOne, this.CircleTwo);
+
+  Offset RectangleOne = const Offset(0, 0);
+  Offset RectangleTwo = const Offset(0, 0);
+  Offset RectangleThree = const Offset(0, 0);
+  CanvasPainter(
+      this.CircleOne,
+      this.CircleTwo,
+      this.RectangleOne,
+      this.RectangleTwo,
+      this.RectangleThree
+      );
 
   List<Rectangle> rectangles = <Rectangle>[];
   List<Circle> circles = <Circle>[];
 
   @override
   void paint(Canvas canvas, Size size) {
-    drawRectangle(canvas, const Size(250, 300), 250, 100);
-    drawRectangle(canvas, const Size(50, 50), 100, 100);
-    drawRectangle(canvas, const Size(400, 75), 100, 350);
+    drawRectangle(canvas, const Size(250, 300), RectangleOne.dx, RectangleOne.dy);
+    drawRectangle(canvas, const Size(50, 50), RectangleTwo.dx, RectangleTwo.dy);
+    drawRectangle(canvas, const Size(400, 75), RectangleThree.dx, RectangleThree.dy);
     drawCircle(canvas, Offset(CircleOne.dx+25, CircleOne.dy+25), 25);
     drawCircle(canvas, Offset(CircleTwo.dx+100, CircleTwo.dy+100), 100);
   }
