@@ -15,7 +15,9 @@ class Ui extends StatefulWidget {
 class _UiState extends State<Ui> {
   double moveDy = 1;
   double moveDx = 1;
-  int indexFigure = 0;
+  int indexRectangle = 0;
+  int indexCircle = 0;
+  bool selectFigure = true;
 
   List<Rectangle> rectangles = <Rectangle>[
     Rectangle(250, 300, const Offset(100, 100)),
@@ -23,8 +25,8 @@ class _UiState extends State<Ui> {
     Rectangle(250, 300, const Offset(300, 300))
   ];
   List<Circle> circles = <Circle>[
-    Circle(radius: 25, offset: const Offset(100, 100)),
-    Circle(radius: 100, offset: const Offset(400, 400))
+    Circle(radius: 25, center: const Offset(100, 100)),
+    Circle(radius: 100, center: const Offset(400, 400))
   ];
 
   bool valueS = false;
@@ -67,10 +69,14 @@ class _UiState extends State<Ui> {
               width: 500,
               child: Slider(
                 label: "Select Age",
-                value: rectangles[indexFigure].start!.dy,
+                value: selectFigure ? rectangles[indexRectangle].start!.dy : circles[indexCircle].center!.dy,
                 onChanged: (value) {
                   setState(() {
-                    rectangles[indexFigure].start = Offset(rectangles[indexFigure].start!.dx, value);
+                    if(selectFigure){
+                      rectangles[indexRectangle].start = Offset(rectangles[indexRectangle].start!.dx, value);
+                    }else{
+                      circles[indexCircle].center = Offset(circles[indexCircle].center!.dx, value);
+                    }
                   });
                 },
                 min: 1,
@@ -91,10 +97,14 @@ class _UiState extends State<Ui> {
                   label: "Select Age",
                   activeColor: Colors.red,
                   thumbColor: Colors.red,
-                  value: rectangles[indexFigure].height!.toDouble(),
+                  value: selectFigure ? rectangles[indexRectangle].height!.toDouble() : circles[indexCircle].radius!.toDouble(),
                   onChanged: (value) {
                     setState(() {
-                      rectangles[indexFigure].height = value.toInt();
+                      if(selectFigure){
+                        rectangles[indexRectangle].height = value.toInt();
+                      }else{
+                        circles[indexCircle].radius = value.toInt();
+                      }
                     });
                   },
                   min: 1,
@@ -109,11 +119,15 @@ class _UiState extends State<Ui> {
           width: 800,
           child: Slider(
             label: "Select Age",
-            value: rectangles[indexFigure].start!.dx,
+            value: selectFigure ? rectangles[indexRectangle].start!.dx : circles[indexCircle].center!.dx,
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  rectangles[indexFigure].start = Offset(value, rectangles[indexFigure].start!.dy);
+                  if(selectFigure){
+                    rectangles[indexRectangle].start = Offset(value, rectangles[indexRectangle].start!.dy);
+                  }else{
+                    circles[indexCircle].center = Offset(value, circles[indexCircle].center!.dy)
+                  }
                 });
               });
             },
@@ -132,11 +146,15 @@ class _UiState extends State<Ui> {
             label: "Select Age",
             activeColor: Colors.red,
             thumbColor: Colors.red,
-            value: rectangles[indexFigure].width!.toDouble(),
+            value: selectFigure ? rectangles[indexRectangle].width!.toDouble() : circles[indexCircle].radius!.toDouble(),
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  rectangles[indexFigure].width = value.toInt();
+                  if(selectFigure){
+                    rectangles[indexRectangle].width = value.toInt();
+                  }else{
+                    circles[indexCircle].radius = value.toInt();
+                  }
                 });
               });
             },
@@ -173,19 +191,24 @@ class _UiState extends State<Ui> {
             setState(() {
               switch(controllerIdFigure.text){
                 case "0":
-                  indexFigure = 0;
+                  selectFigure = true;
+                  indexRectangle = 0;
                   break;
                 case "1":
-                  indexFigure = 1;
+                  selectFigure = true;
+                  indexRectangle = 1;
                   break;
                 case "2":
-                  indexFigure = 2;
+                  selectFigure = true;
+                  indexRectangle = 2;
                   break;
                 case "3":
-                  indexFigure = 3;
+                  selectFigure = false;
+                  indexCircle = 0;
                   break;
                 case "4":
-                  indexFigure = 4;
+                  selectFigure = false;
+                  indexCircle = 1;
                   break;
               }
             });
