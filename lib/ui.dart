@@ -1,5 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:kg/circle.dart';
+import 'package:kg/rectangle.dart';
 
 import 'canvas.dart';
 
@@ -14,8 +16,17 @@ class _UiState extends State<Ui> {
   double moveDy = 1;
   double moveDx = 1;
   int indexFigure = 0;
-  List<Offset> figures = <Offset>[const Offset(1, 1), const Offset(1, 1),
-    const Offset(1, 1), const Offset(1, 1), const Offset(1, 1)];
+
+  List<Rectangle> rectangles = <Rectangle>[
+    Rectangle(250, 300, const Offset(100, 100)),
+    Rectangle(250, 300, const Offset(200, 200)),
+    Rectangle(250, 300, const Offset(300, 300))
+  ];
+  List<Circle> circles = <Circle>[
+    Circle(radius: 25, offset: const Offset(100, 100)),
+    Circle(radius: 100, offset: const Offset(400, 400))
+  ];
+
   bool valueS = false;
   final controllerIdFigure = TextEditingController();
 
@@ -46,11 +57,8 @@ class _UiState extends State<Ui> {
                     border: Border.all(color: Colors.blueAccent)
                 ),
                 child: CanvasWidget(
-                  CircleOne: figures[0],
-                  CircleTwo: figures[1],
-                  RectangleOne: figures[2],
-                  RectangleTwo: figures[3],
-                  RectangleThree: figures[4],
+                  rectangles: rectangles,
+                  circles: circles,
                 )
             ),
           RotatedBox(
@@ -59,10 +67,10 @@ class _UiState extends State<Ui> {
               width: 500,
               child: Slider(
                 label: "Select Age",
-                value: figures[indexFigure].dy,
+                value: rectangles[indexFigure].start!.dy,
                 onChanged: (value) {
                   setState(() {
-                    figures[indexFigure] = Offset(figures[indexFigure].dx, value);
+                    rectangles[indexFigure].start = Offset(rectangles[indexFigure].start!.dx, value);
                   });
                 },
                 min: 1,
@@ -83,14 +91,14 @@ class _UiState extends State<Ui> {
                   label: "Select Age",
                   activeColor: Colors.red,
                   thumbColor: Colors.red,
-                  value: figures[indexFigure].dy,
+                  value: rectangles[indexFigure].height!.toDouble(),
                   onChanged: (value) {
                     setState(() {
-                      figures[indexFigure] = Offset(figures[indexFigure].dx, value);
+                      rectangles[indexFigure].height = value.toInt();
                     });
                   },
                   min: 1,
-                  max: 448,
+                  max: 400,
                 ),
               ),
             ),
@@ -101,11 +109,11 @@ class _UiState extends State<Ui> {
           width: 800,
           child: Slider(
             label: "Select Age",
-            value: figures[indexFigure].dx,
+            value: rectangles[indexFigure].start!.dx,
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  figures[indexFigure] = Offset(value, figures[indexFigure].dy);
+                  rectangles[indexFigure].start = Offset(value, rectangles[indexFigure].start!.dy);
                 });
               });
             },
@@ -124,16 +132,16 @@ class _UiState extends State<Ui> {
             label: "Select Age",
             activeColor: Colors.red,
             thumbColor: Colors.red,
-            value: figures[indexFigure].dx,
+            value: rectangles[indexFigure].width!.toDouble(),
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  figures[indexFigure] = Offset(value, figures[indexFigure].dy);
+                  rectangles[indexFigure].width = value.toInt();
                 });
               });
             },
             min: 1,
-            max: 748,
+            max: 800,
           ),
         ),
 
