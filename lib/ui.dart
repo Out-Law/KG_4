@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 import 'canvas.dart';
@@ -20,49 +19,45 @@ class _UiState extends State<Ui> {
       children: [
         ///Колонка с канвасам и регулировка размера
         upColumn(),
+
         /// Колонка с настройками
         downColumn()
       ],
     );
   }
 
-
-  Widget upColumn(){
+  Widget upColumn() {
     return Column(
       children: [
-        Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-                width: 800,
-                height: 500,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.blueAccent)
-                ),
-                child: CanvasWidget(CircleOne: Offset(moveDx, moveDy), CircleTwo: const Offset(200, 200),)
-            ),
-
-                 RotatedBox(
-              quarterTurns: 1,
-              child: SizedBox(
-                width: 500,
-                child: Slider(
-                  label: "Select Age",
-                  value: moveDy,
-                  onChanged: (value) {
-                    setState(() {
-                      moveDy = value;
-                    });
-                  },
-                  min: 1,
-                  max: 448,
-                ),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Container(
+              width: 800,
+              height: 500,
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border.all(color: Colors.blueAccent)),
+              child: CanvasWidget(
+                CircleOne: Offset(moveDx, moveDy),
+                CircleTwo: const Offset(200, 200),
+              )),
+          RotatedBox(
+            quarterTurns: 1,
+            child: SizedBox(
+              width: 500,
+              child: Slider(
+                label: "Select Age",
+                value: moveDy,
+                onChanged: (value) {
+                  setState(() {
+                    moveDy = value;
+                  });
+                },
+                min: 1,
+                max: 448,
               ),
             ),
-          ]
-        ),
-
+          ),
+        ]),
         SizedBox(
           width: 800,
           child: Slider(
@@ -77,27 +72,22 @@ class _UiState extends State<Ui> {
             max: 748,
           ),
         ),
-
         SizedBox(
           height: 16,
         ),
-
-        const TextField(decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Размер",
-            fillColor: Colors.black12,
-            filled: true
-        )),
-
+        const TextField(
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Размер",
+                fillColor: Colors.black12,
+                filled: true)),
         SizedBox(
           height: 16,
         ),
-
         Container(
           height: 4,
           color: Colors.black,
         ),
-
         SizedBox(
           height: 16,
         ),
@@ -105,7 +95,7 @@ class _UiState extends State<Ui> {
     );
   }
 
-  Widget  downColumn(){
+  Widget downColumn() {
     return Column(
       children: [
         Row(
@@ -242,24 +232,21 @@ class _UiState extends State<Ui> {
             ),
           ],
         ),
-
-        const TextField(decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Размер",
-            fillColor: Colors.black12,
-            filled: true
-        )),
-
+        const TextField(
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Размер",
+                fillColor: Colors.black12,
+                filled: true)),
         const SizedBox(
           height: 10,
         ),
-
-        const TextField(decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Размер",
-            fillColor: Colors.black12,
-            filled: true
-        )),
+        const TextField(
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Размер",
+                fillColor: Colors.black12,
+                filled: true)),
       ],
     );
   }
