@@ -13,8 +13,9 @@ class Ui extends StatefulWidget {
 class _UiState extends State<Ui> {
   double moveDy = 1;
   double moveDx = 1;
-  int indexCircle = 0;
-  List<Offset> circles = <Offset>[const Offset(1, 1), const Offset(1, 1)];
+  int indexFigure = 0;
+  List<Offset> figures = <Offset>[const Offset(1, 1), const Offset(1, 1),
+    const Offset(1, 1), const Offset(1, 1), const Offset(1, 1)];
   bool valueS = false;
   final controllerIdFigure = TextEditingController();
 
@@ -25,7 +26,7 @@ class _UiState extends State<Ui> {
         ///Колонка с канвасам и регулировка размера
         upColumn(),
         /// Колонка с настройками
-        downColumn()
+        //downColumn()
       ],
     );
   }
@@ -45,8 +46,11 @@ class _UiState extends State<Ui> {
                     border: Border.all(color: Colors.blueAccent)
                 ),
                 child: CanvasWidget(
-                  CircleOne: circles[0],
-                  CircleTwo: circles[1],
+                  CircleOne: figures[0],
+                  CircleTwo: figures[1],
+                  RectangleOne: figures[2],
+                  RectangleTwo: figures[3],
+                  RectangleThree: figures[4],
                 )
             ),
           RotatedBox(
@@ -55,10 +59,10 @@ class _UiState extends State<Ui> {
               width: 500,
               child: Slider(
                 label: "Select Age",
-                value: circles[indexCircle].dy,
+                value: figures[indexFigure].dy,
                 onChanged: (value) {
                   setState(() {
-                    circles[indexCircle] = Offset(circles[indexCircle].dx, value);
+                    figures[indexFigure] = Offset(figures[indexFigure].dx, value);
                   });
                 },
                 min: 1,
@@ -66,6 +70,30 @@ class _UiState extends State<Ui> {
               ),
             ),
           ),
+
+            const SizedBox(
+              width: 16,
+            ),
+
+            RotatedBox(
+              quarterTurns: 1,
+              child: SizedBox(
+                width: 500,
+                child: Slider(
+                  label: "Select Age",
+                  activeColor: Colors.red,
+                  thumbColor: Colors.red,
+                  value: figures[indexFigure].dy,
+                  onChanged: (value) {
+                    setState(() {
+                      figures[indexFigure] = Offset(figures[indexFigure].dx, value);
+                    });
+                  },
+                  min: 1,
+                  max: 448,
+                ),
+              ),
+            ),
         ]
         ),
 
@@ -73,11 +101,11 @@ class _UiState extends State<Ui> {
           width: 800,
           child: Slider(
             label: "Select Age",
-            value: circles[indexCircle].dx,
+            value: figures[indexFigure].dx,
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  circles[indexCircle] = Offset(value, circles[indexCircle].dy);
+                  figures[indexFigure] = Offset(value, figures[indexFigure].dy);
                 });
               });
             },
@@ -85,6 +113,30 @@ class _UiState extends State<Ui> {
             max: 748,
           ),
         ),
+
+        const SizedBox(
+          height: 16,
+        ),
+
+        SizedBox(
+          width: 800,
+          child: Slider(
+            label: "Select Age",
+            activeColor: Colors.red,
+            thumbColor: Colors.red,
+            value: figures[indexFigure].dx,
+            onChanged: (value) {
+              setState(() {
+                setState(() {
+                  figures[indexFigure] = Offset(value, figures[indexFigure].dy);
+                });
+              });
+            },
+            min: 1,
+            max: 748,
+          ),
+        ),
+
 
         const SizedBox(
           height: 16,
@@ -113,10 +165,19 @@ class _UiState extends State<Ui> {
             setState(() {
               switch(controllerIdFigure.text){
                 case "0":
-                  indexCircle = 0;
+                  indexFigure = 0;
                   break;
                 case "1":
-                  indexCircle = 1;
+                  indexFigure = 1;
+                  break;
+                case "2":
+                  indexFigure = 2;
+                  break;
+                case "3":
+                  indexFigure = 3;
+                  break;
+                case "4":
+                  indexFigure = 4;
                   break;
               }
             });
