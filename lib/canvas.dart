@@ -4,8 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class CanvasWidget extends StatefulWidget {
-
-  const CanvasWidget({Key? key}) : super(key: key);
+  Offset CircleOne = const Offset(0, 0);
+  Offset CircleTwo = const Offset(0, 0);
+  CanvasWidget({Key? key, required this.CircleOne, required this.CircleTwo}) : super(key: key);
 
   @override
   _CanvasWidgetState createState() => _CanvasWidgetState();
@@ -17,43 +18,31 @@ class _CanvasWidgetState extends State<CanvasWidget> {
   Widget build(BuildContext context) {
     return CustomPaint(
       willChange: true,
-      painter: CanvasPainter(),
+      painter: CanvasPainter(widget.CircleOne, widget.CircleTwo),
     );
   }
 }
 
 class CanvasPainter extends CustomPainter {
-
-  CanvasPainter();
+  List<Offset> points = <Offset>[];
+  List<Offset> pointsCircle = <Offset>[];
+  Offset CircleOne = const Offset(0, 0);
+  Offset CircleTwo = const Offset(0, 0);
+  CanvasPainter(this.CircleOne, this.CircleTwo);
 
   @override
   void paint(Canvas canvas, Size size) {
-    draw(canvas, size);
+    drawRectangle(canvas, const Size(250, 300), 250, 100);
+    drawRectangle(canvas, const Size(50, 50), 100, 100);
+    drawRectangle(canvas, const Size(400, 75), 100, 350);
+    drawCircle(canvas, Offset(CircleOne.dx+25, CircleOne.dy+25), 25);
+    drawCircle(canvas, Offset(CircleTwo.dx+100, CircleTwo.dy+100), 100);
   }
 
   @override
   bool shouldRepaint(CanvasPainter oldDelegate) => false;
 
-  void draw(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.black
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.fill;
-
-    //drawGrid(canvas, size);
-
-    //canvas.drawCircle(const Offset(150.0, 150.0), 15.0, paint);
-
-    List<Offset> points = <Offset>[const Offset(150.0, 150.0), const Offset(250.0, 250.0)];
-
-    for(double i = 1; i < 50; i++){
-      points.add(Offset(150.0+i, 150.0+i));
-    }
-
-    canvas.drawPoints(PointMode.points, points, paint);
-  }
-
-  void drawRectangle(Canvas canvas, Size size, ) {
+  void drawRectangle(Canvas canvas, Size size, double dx, double dy) {
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 1.0
@@ -61,14 +50,60 @@ class CanvasPainter extends CustomPainter {
     final width = size.width;
     final height = size.height;
 
-   /* for(double i = widget.topLeft.dx; i < widget.topLeft.dx + widget.width; i++){
-      widget.points?.add(Offset(i, widget.topLeft.dy));
-      widget.points?.add(Offset(i, widget.topLeft.dy+widget.height));
+    for(double i = dx; i < dx + width; i++){
+      points.add(Offset(i, dy));
+      points.add(Offset(i, dy+height));
     }
-    for(double i = widget.topLeft.dy; i < widget.topLeft.dy + widget.height; i++){
-      widget.points?.add(Offset(widget.topLeft.dx, i));
-      widget.points?.add(Offset(widget.topLeft.dx+widget.width, i));
-    }*/
+    for(double i = dy; i < dy + height; i++){
+      points.add(Offset(dx, i));
+      points.add(Offset(dx+width, i));
+    }
+
+    canvas.drawPoints(PointMode.points, points, paint);
   }
+
+
+  void drawCircle(Canvas canvas, Offset center, double radius){
+    final paint = Paint()
+      ..color = Colors.black
+      ..strokeWidth = 1.0
+      ..style = PaintingStyle.stroke;
+
+    int x = 0;
+    int y = radius.toInt();
+    int delta = 1 - 2 * radius.toInt();
+    int error = 0;
+
+    while(y >= 0)
+    {
+      pointsCircle.add(Offset(center.dx + x, center.dy + y));
+      pointsCircle.add(Offset(center.dx + x, center.dy - y));
+      pointsCircle.add(Offset(center.dx - x, center.dy + y));
+      pointsCircle.add(Offset(center.dx - x, center.dy - y));
+
+      error = 2 * (delta + y) - 1;
+      if(delta < 0 && error <= 0)
+      {
+        ++x;
+        delta += 2 * x + 1;
+        continue;
+      }
+
+      error = 2 * (delta - x) - 1;
+      if(delta > 0 && error > 0)
+      {
+        --y;
+        delta += 1 - 2 * y;
+        continue;
+      }
+
+      ++x;
+      delta += 2 * (x - y);
+      --y;
+    }
+
+    canvas.drawPoints(PointMode.points, pointsCircle, paint);
+  }
+
 
 }

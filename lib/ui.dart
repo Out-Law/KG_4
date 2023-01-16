@@ -11,7 +11,8 @@ class Ui extends StatefulWidget {
 }
 
 class _UiState extends State<Ui> {
-  int age = 10;
+  double moveDx = 1;
+  double moveDy = 1;
   bool valueS = false;
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,7 @@ class _UiState extends State<Ui> {
                     color: Colors.white,
                     border: Border.all(color: Colors.blueAccent)
                 ),
-                child: const CanvasWidget()
+                child: CanvasWidget(CircleOne: Offset(moveDx, moveDy), CircleTwo: const Offset(200, 200),)
             ),
 
                  RotatedBox(
@@ -48,14 +49,14 @@ class _UiState extends State<Ui> {
                 width: 500,
                 child: Slider(
                   label: "Select Age",
-                  value: age.toDouble(),
+                  value: moveDy,
                   onChanged: (value) {
                     setState(() {
-                      age = value.toInt();
+                      moveDy = value;
                     });
                   },
-                  min: 5,
-                  max: 100,
+                  min: 1,
+                  max: 448,
                 ),
               ),
             ),
@@ -66,14 +67,14 @@ class _UiState extends State<Ui> {
           width: 800,
           child: Slider(
             label: "Select Age",
-            value: age.toDouble(),
+            value: moveDx,
             onChanged: (value) {
               setState(() {
-                age = value.toInt();
+                moveDx = value;
               });
             },
-            min: 5,
-            max: 100,
+            min: 1,
+            max: 748,
           ),
         ),
 
