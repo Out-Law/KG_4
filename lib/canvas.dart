@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 class CanvasWidget extends StatefulWidget {
   Offset CircleOne = const Offset(0, 0);
   Offset CircleTwo = const Offset(0, 0);
+
   CanvasWidget({Key? key, required this.CircleOne, required this.CircleTwo}) : super(key: key);
 
   @override
