@@ -102,11 +102,11 @@ class Circle {
     return offset!;
   }
 
-  void addClip(Offset start, Offset end, bool mode) {
+  void addArc(Offset start, Offset end, bool mode) {
     arcs.add(Arc.angle(start, end, offset!, radius!, mode));
   }
 
-  void addClipAllCircle() {
+  void addArcAllCircle() {
     arcs.add(Arc(angle: 0, length: 360));
   }
 
@@ -133,7 +133,7 @@ class Circle {
     }
   }
 
-  List<Arc> getClippings() {
+  List<Arc> getArcs() {
     return arcs;
   }
 
