@@ -1,5 +1,6 @@
-
 import 'package:flutter/material.dart';
+import 'package:kg/circle.dart';
+import 'package:kg/rectangle.dart';
 
 import 'canvas.dart';
 
@@ -14,8 +15,19 @@ class _UiState extends State<Ui> {
   double moveDy = 1;
   double moveDx = 1;
   int indexFigure = 0;
-  List<Offset> figures = <Offset>[const Offset(1, 1), const Offset(1, 1),
-    const Offset(1, 1), const Offset(1, 1), const Offset(1, 1)];
+
+  List<Rectangle> rectangles = <Rectangle>[
+    Rectangle(600, 350, const Offset(1, 1)),
+    Rectangle(700, 300, const Offset(10, 10)),
+    Rectangle(650, 400, const Offset(5, 5))
+  ];
+  List<Circle> circles = <Circle>[
+    Circle(radius: 25, center: const Offset(100, 100)),
+    Circle(radius: 70, center: const Offset(115, 110)),
+    Circle(radius: 50, center: const Offset(500, 150)),
+    Circle(radius: 100, center: const Offset(200, 400))
+  ];
+
   bool valueS = false;
   final controllerIdFigure = TextEditingController();
 
@@ -25,44 +37,37 @@ class _UiState extends State<Ui> {
       children: [
         ///Колонка с канвасам и регулировка размера
         upColumn(),
+
         /// Колонка с настройками
         //downColumn()
       ],
     );
   }
 
-
-  Widget upColumn(){
+  Widget upColumn() {
     return Column(
       children: [
-        Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-                width: 800,
-                height: 500,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(color: Colors.blueAccent)
-                ),
-                child: CanvasWidget(
-                  CircleOne: figures[0],
-                  CircleTwo: figures[1],
-                  RectangleOne: figures[2],
-                  RectangleTwo: figures[3],
-                  RectangleThree: figures[4],
-                )
-            ),
+        Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Container(
+              width: 800,
+              height: 500,
+              decoration: BoxDecoration(
+                  color: Colors.white, border: Border.all(color: Colors.black)),
+              child: CanvasWidget(
+                rectangles: rectangles,
+                circles: circles,
+              )),
           RotatedBox(
             quarterTurns: 1,
             child: SizedBox(
               width: 500,
               child: Slider(
                 label: "Select Age",
-                value: figures[indexFigure].dy,
+                value: rectangles[indexFigure].start!.dy,
                 onChanged: (value) {
                   setState(() {
-                    figures[indexFigure] = Offset(figures[indexFigure].dx, value);
+                    rectangles[indexFigure].start =
+                        Offset(rectangles[indexFigure].start!.dx, value);
                   });
                 },
                 min: 1,
@@ -70,42 +75,39 @@ class _UiState extends State<Ui> {
               ),
             ),
           ),
-
-            const SizedBox(
-              width: 16,
-            ),
-
-            RotatedBox(
-              quarterTurns: 1,
-              child: SizedBox(
-                width: 500,
-                child: Slider(
-                  label: "Select Age",
-                  activeColor: Colors.red,
-                  thumbColor: Colors.red,
-                  value: figures[indexFigure].dy,
-                  onChanged: (value) {
-                    setState(() {
-                      figures[indexFigure] = Offset(figures[indexFigure].dx, value);
-                    });
-                  },
-                  min: 1,
-                  max: 448,
-                ),
+          const SizedBox(
+            width: 16,
+          ),
+          RotatedBox(
+            quarterTurns: 1,
+            child: SizedBox(
+              width: 500,
+              child: Slider(
+                label: "Select Age",
+                activeColor: Colors.red,
+                thumbColor: Colors.red,
+                value: rectangles[indexFigure].height!.toDouble(),
+                onChanged: (value) {
+                  setState(() {
+                    rectangles[indexFigure].height = value.toInt();
+                  });
+                },
+                min: 1,
+                max: 400,
               ),
             ),
-        ]
-        ),
-
+          ),
+        ]),
         SizedBox(
           width: 800,
           child: Slider(
             label: "Select Age",
-            value: figures[indexFigure].dx,
+            value: rectangles[indexFigure].start!.dx,
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  figures[indexFigure] = Offset(value, figures[indexFigure].dy);
+                  rectangles[indexFigure].start =
+                      Offset(value, rectangles[indexFigure].start!.dy);
                 });
               });
             },
@@ -113,57 +115,47 @@ class _UiState extends State<Ui> {
             max: 748,
           ),
         ),
-
         const SizedBox(
           height: 16,
         ),
-
         SizedBox(
           width: 800,
           child: Slider(
             label: "Select Age",
             activeColor: Colors.red,
             thumbColor: Colors.red,
-            value: figures[indexFigure].dx,
+            value: rectangles[indexFigure].width!.toDouble(),
             onChanged: (value) {
               setState(() {
                 setState(() {
-                  figures[indexFigure] = Offset(value, figures[indexFigure].dy);
+                  rectangles[indexFigure].width = value.toInt();
                 });
               });
             },
             min: 1,
-            max: 748,
+            max: 800,
           ),
         ),
-
-
         const SizedBox(
           height: 16,
         ),
-
-
         TextField(
             controller: controllerIdFigure,
             decoration: const InputDecoration(
                 border: InputBorder.none,
                 hintText: "ID фигуры",
                 fillColor: Colors.black12,
-                filled: true
-            )
-        ),
-
+                filled: true)),
         const SizedBox(
           height: 16,
         ),
-
         ElevatedButton(
           child: const Text(
             'OK',
           ),
           onPressed: () {
             setState(() {
-              switch(controllerIdFigure.text){
+              switch (controllerIdFigure.text) {
                 case "0":
                   indexFigure = 0;
                   break;
@@ -183,16 +175,13 @@ class _UiState extends State<Ui> {
             });
           },
         ),
-
         const SizedBox(
           height: 16,
         ),
-
         Container(
           height: 4,
           color: Colors.black,
         ),
-
         const SizedBox(
           height: 16,
         ),
@@ -200,7 +189,7 @@ class _UiState extends State<Ui> {
     );
   }
 
-  Widget  downColumn(){
+  Widget downColumn() {
     return Column(
       children: [
         Row(
@@ -337,36 +326,29 @@ class _UiState extends State<Ui> {
             ),
           ],
         ),
-
-        const TextField(decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Размер",
-            fillColor: Colors.black12,
-            filled: true
-        )),
-
+        const TextField(
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Размер",
+                fillColor: Colors.black12,
+                filled: true)),
         const SizedBox(
           height: 10,
         ),
-
-        const TextField(decoration: InputDecoration(
-            border: InputBorder.none,
-            hintText: "Размер",
-            fillColor: Colors.black12,
-            filled: true
-        )),
-
+        const TextField(
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: "Размер",
+                fillColor: Colors.black12,
+                filled: true)),
         const SizedBox(
           height: 10,
         ),
-
         ElevatedButton(
           child: const Text(
             'OK',
           ),
-          onPressed: () {
-
-          },
+          onPressed: () {},
         ),
       ],
     );
