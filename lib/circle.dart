@@ -72,10 +72,9 @@ class Circle {
 
   Circle({this.radius, this.center});
 
-  // void Clear()
-  // {
-  //     _clip.Clear();
-  // }
+  void Clear() {
+    arcs.clear();
+  }
 
   //изменить радиус
   void setRadius(int radius) {
@@ -99,6 +98,10 @@ class Circle {
   //получить координату
   Offset getOffset() {
     return center!;
+  }
+
+  void clear() {
+    arcs.clear();
   }
 
   void addArc(Offset start, Offset end, bool mode) {

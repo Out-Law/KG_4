@@ -6,7 +6,7 @@ import 'rectangle.dart';
 import 'circle.dart';
 
 class CanvasWidget extends StatefulWidget {
- /* Offset CircleOne = const Offset(0, 0);
+  /* Offset CircleOne = const Offset(0, 0);
   Offset CircleTwo = const Offset(0, 0);
 
   Offset RectangleOne = const Offset(0, 0);
@@ -16,11 +16,7 @@ class CanvasWidget extends StatefulWidget {
   List<Rectangle> rectangles = <Rectangle>[];
   List<Circle> circles = <Circle>[];
 
-  CanvasWidget(
-      {Key? key,
-      required this.rectangles,
-      required this.circles
-      })
+  CanvasWidget({Key? key, required this.rectangles, required this.circles})
       : super(key: key);
 
   @override
@@ -43,12 +39,12 @@ class CanvasPainter extends CustomPainter {
 
   List<Rectangle> rectangles = <Rectangle>[];
   List<Circle> circles = <Circle>[];
- /* Offset CircleOne = const Offset(0, 0);
+  /* Offset CircleOne = const Offset(0, 0);
   Offset CircleTwo = const Offset(0, 0);*/
 
-  int mode = 0;
+  int mode = 1;
 
- /* Offset RectangleOne = const Offset(0, 0);
+  /* Offset RectangleOne = const Offset(0, 0);
   Offset RectangleTwo = const Offset(0, 0);
   Offset RectangleThree = const Offset(0, 0);*/
 
@@ -56,7 +52,7 @@ class CanvasPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    Draw(canvas);
+    draw(canvas);
   }
 
   @override
@@ -409,11 +405,23 @@ class CanvasPainter extends CustomPainter {
         (m.dy > c.dy ? 8 : 0);
   }
 
-  void Draw(Canvas canvas) {
+  void clear() {
+    for (var rect in rectangles) {
+      rect.clear();
+    }
+
+    for (var circle in circles) {
+      circle.clear();
+    }
+  }
+
+  void draw(Canvas canvas) {
     final paint = Paint()
       ..color = Colors.black
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
+
+    clear();
 
     //найти пересения, принимая, что на каждой итерации нижний и верхний слой целые и ничем ранее не перекрыты
     //нахождение перекрытх частей окружностей окружностями (слои от 1 до 3 с слоями от 2 до 4)
@@ -424,9 +432,10 @@ class CanvasPainter extends CustomPainter {
         int radi = circles[i].radius!;
         int radj = circles[j].radius!;
 
-        List<Offset> mac = getIntersectionOfTwoCircles(circi, radi, circj, radj);
+        List<Offset> mac =
+            getIntersectionOfTwoCircles(circi, radi, circj, radj);
 
-        print(mac);
+        // print(mac);
 
         //если 2 точки пересечения
         if (mac[0] != Offset(-1, -1) && mac[1] != Offset(-1, -1)) {
@@ -476,15 +485,15 @@ class CanvasPainter extends CustomPainter {
         a = Offset(rectangles[j].getOffset().dx,
             rectangles[j].getOffset().dy + rectangles[j].getHeight());
         b = Offset(rectangles[j].getOffset().dx + rectangles[j].getWidht(),
-            rectangles[j].getOffset().dy + rectangles[i].getHeight());
+            rectangles[j].getOffset().dy + rectangles[j].getHeight());
         mac = getIntersectionOfLineAndCircle(
             circles[i].center!, circles[i].getRadius(), a, b);
 
         //для стороны 4 правой
-        a = Offset(rectangles[j].getOffset().dx + rectangles[i].getWidht(),
+        a = Offset(rectangles[j].getOffset().dx + rectangles[j].getWidht(),
             rectangles[j].getOffset().dy);
-        b = Offset(rectangles[j].getOffset().dx + rectangles[i].getWidht(),
-            rectangles[j].getOffset().dy + rectangles[i].getHeight());
+        b = Offset(rectangles[j].getOffset().dx + rectangles[j].getWidht(),
+            rectangles[j].getOffset().dy + rectangles[j].getHeight());
         mac = getIntersectionOfLineAndCircle(
             circles[i].center!, circles[i].getRadius(), a, b);
       }
@@ -526,23 +535,23 @@ class CanvasPainter extends CustomPainter {
 
     //отрисовать видимые части
     for (int i = 0; i < circles.length; i++) {
-      List<Arc> vis = circles[i].getVisible();
+      List<Arc> visibleArcs = circles[i].getVisible();
 
-      for (var v in vis) {
+      for (var arc in visibleArcs) {
         Rect rect = Rect.fromCenter(
             center:
                 Offset(circles[i].getOffset().dx, circles[i].getOffset().dy),
             width: circles[i].getRadius() * 2,
             height: circles[i].getRadius() * 2);
-        canvas.drawArc(rect, v.angle!, v.length!, true, paint);
+        canvas.drawArc(rect, arc.angle!, arc.length!, false, paint);
       }
     }
 
     for (int i = 0; i < rectangles.length; i++) {
-      List<PartRectangle> vis = rectangles[i].getVisible();
+      List<PartRectangle> visibleParts = rectangles[i].getVisible();
 
-      for (var v in vis) {
-        canvas.drawLine(v.getStart(), v.getEnd(), paint);
+      for (var part in visibleParts) {
+        canvas.drawLine(part.getStart(), part.getEnd(), paint);
       }
     }
 
@@ -563,7 +572,7 @@ class CanvasPainter extends CustomPainter {
                   Offset(circles[i].getOffset().dx, circles[i].getOffset().dy),
               width: circles[i].getRadius() * 2,
               height: circles[i].getRadius() * 2);
-          canvas.drawArc(rect, v.angle!, v.length!, true, paintRed);
+          canvas.drawArc(rect, v.angle!, v.length!, false, paintRed);
         }
       }
 
@@ -575,76 +584,5 @@ class CanvasPainter extends CustomPainter {
         }
       }
     }
-
-    // pictureBox1.Image = bitmap;
   }
-
-  // //Начальная инициализация каждого кадра
-  // void pictureBox1_Paint(object sender, PaintEventArgs e)
-  // {
-  //     base.OnPaint(e);
-  //     bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
-  //     graphics = Graphics.FromImage(bitmap);
-  //     graphics.Clear(backColor);
-  // }
-
-  //если mode = 1, то режим А
-  //если mode = 0, то режим Б
-  // void checkBox1_CheckedChanged(object sender, EventArgs e)
-  // {
-  //     //если галочка на А
-  //     if (checkBox1.Checked)
-  //     {
-  //         mode = 1;
-  //         checkBox2.Checked = false;
-  //     } else
-  //     {
-  //         mode = 0;
-  //         checkBox2.Checked = true;
-  //     }
-
-  //     Draw();
-  // }
-  // void checkBox2_CheckedChanged(object sender, EventArgs e)
-  // {
-  //     //если галочка на Б
-  //     if (checkBox2.Checked)
-  //     {
-  //         mode = 0;
-  //         checkBox1.Checked = false;
-  //     }
-  //     else
-  //     {
-  //         mode = 1;
-  //         checkBox1.Checked = true;
-  //     }
-
-  //     Draw();
-  // }
-  // void Form1_Load(object sender, EventArgs e)
-  // {
-  //     trackValue = trackBar1.Value;
-  //     circles = new List<Circle>();
-
-  //     //нужно заменить на рандом в промежутке от 0 до pictureBox1.Height - 2*(int)numericUpDown1.Value
-  //     int y1 = rand.Next() % (pictureBox1.Height - 2 * (int)numericUpDown1.Value);
-  //     int y2 = rand.Next() % (pictureBox1.Height - 2 * (int)numericUpDown2.Value);
-  //     int y3 = rand.Next() % (pictureBox1.Height - 2 * (int)numericUpDown4.Value);
-  //     int y4 = rand.Next() % (pictureBox1.Height - 2 * (int)numericUpDown5.Value);
-
-  //     circles.Add(new Circle((int)numericUpDown1.Value, Offset(zeroX, y1)));
-  //     circles.Add(new Circle((int)numericUpDown2.Value, Offset(zeroX, y2)));
-  //     circles.Add(new Circle((int)numericUpDown4.Value, Offset(zeroX, y3)));
-  //     circles.Add(new Circle((int)numericUpDown5.Value, Offset(zeroX, y4)));
-
-  //     rectangles = new List<Rectangle>();
-
-  //     int y5 = rand.Next() % (pictureBox1.Height - (int)numericUpDown6.Value);
-  //     int y6 = rand.Next() % (pictureBox1.Height - (int)numericUpDown7.Value);
-  //     int y7 = rand.Next() % (pictureBox1.Height - (int)numericUpDown3.Value);
-
-  //     rectangles.Add(new Rectangle((int)numericUpDown8.Value, (int)numericUpDown6.Value, Offset(zeroX, y5)));
-  //     rectangles.Add(new Rectangle((int)numericUpDown9.Value, (int)numericUpDown7.Value, Offset(zeroX, y6)));
-  //     rectangles.Add(new Rectangle((int)numericUpDown10.Value, (int)numericUpDown3.Value, Offset(zeroX, y7)));
-  // }
 }
