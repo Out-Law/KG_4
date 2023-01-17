@@ -42,7 +42,7 @@ class CanvasPainter extends CustomPainter {
   /* Offset CircleOne = const Offset(0, 0);
   Offset CircleTwo = const Offset(0, 0);*/
 
-  int mode = 1;
+  int mode = 0;
 
   /* Offset RectangleOne = const Offset(0, 0);
   Offset RectangleTwo = const Offset(0, 0);
@@ -117,35 +117,30 @@ class CanvasPainter extends CustomPainter {
     canvas.drawPoints(PointMode.points, pointsCircle, paint);
   }
 
-  int codePack(int xl, int xp, int yn, int yv, Offset a) {
+  int packing(int xl, int xp, int yn, int yv, Offset a) {
     return (a.dx < xl ? 1 : 0) +
         (a.dx > xp ? 2 : 0) +
         (a.dy < yv ? 4 : 0) +
         (a.dy > yn ? 8 : 0);
   }
 
-  //точки прямой, порядковый номер прямоугольника, которому принадледит прямая, окно видимости
-  void alClipping(Offset a, Offset b, int i, Rectangle rec) {
+  void findPart(Offset a, Offset b, int i, Rectangle rec) {
     Offset copya = a;
     Offset copyb = b;
 
     Offset c;
-    //Алгоритм отсечения Сазерленда-Коэна
-    //для ортогонального окна 6
-    int xl = rec.getOffset().dx.toInt();
-    int yv = rec.getOffset().dy.toInt();
-    int xp = rec.getOffset().dx.toInt() + rec.getWidht();
-    int yn = rec.getOffset().dy.toInt() + rec.getHeight();
 
-    //код концов отрезка
+    int xl = rec.start!.dx.toInt();
+    int yv = rec.start!.dy.toInt();
+    int xp = rec.start!.dx.toInt() + rec.width!;
+    int yn = rec.start!.dy.toInt() + rec.height!;
+
     int code_a, code_b, code;
 
-    code_a = codePack(xl, xp, yn, yv, a);
-    code_b = codePack(xl, xp, yn, yv, b);
+    code_a = packing(xl, xp, yn, yv, a);
+    code_b = packing(xl, xp, yn, yv, b);
 
-    //если 2 прямой не лежат по одну сторону от окна
     if (code_a != 0 && code_b != 0) {
-      //если две точки находятся по одну сторону
       if (((code_a & 8) != 0 && (code_b & 8) != 0 ||
           (code_b & 4) != 0 && (code_a & 4) != 0 ||
           (code_a & 1) != 0 && (code_b & 1) != 0 ||
@@ -154,7 +149,6 @@ class CanvasPainter extends CustomPainter {
         return;
       }
 
-      //если две точки не находятся в противоположных сторонах друг от друга
       if (!((code_a & 8) != 0 && (code_b & 4) != 0 ||
           (code_b & 8) != 0 && (code_a & 4) != 0 ||
           (code_a & 1) != 0 && (code_b & 2) != 0 ||
@@ -164,7 +158,6 @@ class CanvasPainter extends CustomPainter {
     }
 
     while ((code_a | code_b) != 0) {
-      // выбираем точку c с ненулевым кодом
       if (code_a != 0) {
         code = code_a;
         c = a;
@@ -173,32 +166,25 @@ class CanvasPainter extends CustomPainter {
         c = b;
       }
 
-      //если с левее окна, то передвигаем c на прямую x = хл
-      //если c правее окна, то передвигаем c на прямую x = хп
-
       if ((code & 1) != 0) {
         c = Offset(xl.toDouble(), c.dy);
       } else if ((code & 2) != 0) {
         c = Offset(xp.toDouble(), c.dy);
-      }
-      // если c ниже окна, то передвигаем c на прямую y = yn
-      //если c выше окна, то передвигаем c на прямую y = yv
-      else if ((code & 4) != 0) {
+      } else if ((code & 4) != 0) {
         c = Offset(c.dx, yv.toDouble());
       } else if ((code & 8) != 0) {
         c = Offset(c.dx, yn.toDouble());
       }
 
-      //обновляем код
       if (code == code_a) {
-        code_a = codePack(xl, xp, yn, yv, c);
+        code_a = packing(xl, xp, yn, yv, c);
         a = c;
       } else {
-        code_b = codePack(xl, xp, yn, yv, c);
+        code_b = packing(xl, xp, yn, yv, c);
         b = c;
       }
     }
-    //отсылаем кусок стороны, которую не видно
+
     if (copya != a) {
       rectangles[i].addPart(copya, a);
     }
@@ -207,78 +193,55 @@ class CanvasPainter extends CustomPainter {
     }
   }
 
-  List<Offset> getIntersectionOfTwoCircles(
+  List<Offset> intersectTwoCircles(
       Offset circle1, int radius1, Offset circle2, int radius2) {
     Offset p1 = Offset(-1, -1);
     Offset p2 = Offset(-1, -1);
 
-    // Уравнение окружности 1
-    int xCoeffEq1 = 2 * (-circle1.dx.toInt());
-    int xAbsoluteTermEq1 = (circle1.dx * circle1.dx).toInt();
+    int coefX1 = 2 * (-circle1.dx.toInt());
+    int x1pow2 = (circle1.dx * circle1.dx).toInt();
 
-    int yCoeffEq1 = 2 * (-circle1.dy.toInt());
-    int yAbsoluteTermEq1 = (circle1.dy * circle1.dy).toInt();
+    int coefY1 = 2 * (-circle1.dy.toInt());
+    int y1pow2 = (circle1.dy * circle1.dy).toInt();
 
-    int totalAbsoluteTermEq1 =
-        xAbsoluteTermEq1 + yAbsoluteTermEq1 - radius1 * radius1;
+    int circleEquation1 = x1pow2 + y1pow2 - radius1 * radius1;
 
-    // Уравнение окружности 2
-    int xCoeffEq2 = 2 * (-circle2.dx.toInt());
-    int xAbsoluteTermEq2 = (circle2.dx * circle2.dx).toInt();
+    int coefX2 = 2 * (-circle2.dx.toInt());
+    int x2pow2 = (circle2.dx * circle2.dx).toInt();
 
-    int yCoeffEq2 = 2 * (-circle2.dy.toInt());
-    int yAbsoluteTermEq2 = (circle2.dy * circle2.dy).toInt();
+    int coefY2 = 2 * (-circle2.dy.toInt());
+    int y2pow2 = (circle2.dy * circle2.dy).toInt();
 
-    int totalAbsoluteTermEq2 =
-        xAbsoluteTermEq2 + yAbsoluteTermEq2 - radius2 * radius2;
+    int circleEquation2 = x2pow2 + y2pow2 - radius2 * radius2;
 
-    // Вычитаем уравнение 2 из уравнения 1
-    // 4x - 6y - 16 = 0 - получаем в итоге
-    int shortedXCoef = xCoeffEq1 - xCoeffEq2; // 4x
-    int shortedYCoef = yCoeffEq1 - yCoeffEq2; // -6y
-    int shortedAbsoluteTerm =
-        totalAbsoluteTermEq1 - totalAbsoluteTermEq2; // -16
+    int shortedXCoef = coefX1 - coefX2;
+    int shortedYCoef = coefY1 - coefY2;
+    int shortedAbsoluteTerm = circleEquation1 - circleEquation2;
 
     if (shortedXCoef != 0) {
-      // 4x - 6y - 16 = 0 в x = (6y + 16)/4 => x = 1.5y + 4;
-      // double reducedXCoefRelativeX = 1.0; // x
-      double reducedYCoefRelativeX =
-          -(shortedYCoef.toDouble() / shortedXCoef); // 6y / 4 = 1.5y;
+      double reducedYCoefRelativeX = -(shortedYCoef.toDouble() / shortedXCoef);
       double reducedAbsoluteTermRelativeX =
-          -(shortedAbsoluteTerm.toDouble() / shortedXCoef); // 16 / 4 = 4;
+          -(shortedAbsoluteTerm.toDouble() / shortedXCoef);
 
-      // x^2 = (1.5y + 4)^2, раскрываем этот квадрат и находим коэффициенты ay^2 + by + c
       double aCoefInReplacedDoubledX =
-          reducedYCoefRelativeX * reducedYCoefRelativeX; // (1.5y)^2 = 2.25y^2
-      double bCoefInReplacedDoubledX = 2 *
-          reducedYCoefRelativeX *
-          reducedAbsoluteTermRelativeX; // 2 * 1.5y * 4 = 12y;
-      double cCoefInReplacedDoubledX = reducedAbsoluteTermRelativeX *
-          reducedAbsoluteTermRelativeX; // 4 * 4 = 16;
+          reducedYCoefRelativeX * reducedYCoefRelativeX;
+      double bCoefInReplacedDoubledX =
+          2 * reducedYCoefRelativeX * reducedAbsoluteTermRelativeX;
+      double cCoefInReplacedDoubledX =
+          reducedAbsoluteTermRelativeX * reducedAbsoluteTermRelativeX;
 
-      // Т.к. мы будем подставлять в уравнение 1, то смотрим на коэффициент X в переменной xCoeffEq1
-      // -2x = -2*(1.5y + 4)
-      double aCoefInReplacedX =
-          xCoeffEq1 * reducedYCoefRelativeX; // -2 * 1.5y = -3y
-      double bCoefInReplacedX =
-          xCoeffEq1 * reducedAbsoluteTermRelativeX; // -2 * 4 = -8
+      double aCoefInReplacedX = coefX1 * reducedYCoefRelativeX;
+      double bCoefInReplacedX = coefX1 * reducedAbsoluteTermRelativeX;
 
-      // 3,25y^2 + 7y + 1 = 0
-      double finalACoef =
-          aCoefInReplacedDoubledX + 1; // 2.25y^2 + y^2 = 3.25y^2
-      double finalBCoef = bCoefInReplacedDoubledX +
-          aCoefInReplacedX +
-          yCoeffEq1; // 12y - 3y - 2y = 7y
-      double finalCCoef = cCoefInReplacedDoubledX +
-          bCoefInReplacedX +
-          totalAbsoluteTermEq1; // 16 - 8 - 7 = 1
+      double finalACoef = aCoefInReplacedDoubledX + 1;
+      double finalBCoef = bCoefInReplacedDoubledX + aCoefInReplacedX + coefY1;
+      double finalCCoef =
+          cCoefInReplacedDoubledX + bCoefInReplacedX + circleEquation1;
 
-      // D = b^2 - 4ac
       double discriminant =
           finalBCoef * finalBCoef - 4 * finalACoef * finalCCoef;
 
       if (discriminant > 0) {
-        // x1 = (-b + sqrt(D) ) / 2a
         double y1 = (-finalBCoef + sqrt(discriminant)) / (2 * finalACoef);
         double y2 = (-finalBCoef - sqrt(discriminant)) / (2 * finalACoef);
 
@@ -300,14 +263,13 @@ class CanvasPainter extends CustomPainter {
       double cCoefInReplacedDoubledY =
           reducedAbsoluteTermRelativeY * reducedAbsoluteTermRelativeY;
 
-      double aCoefInReplacedY = yCoeffEq1 * reducedXCoefRelativeY;
-      double bCoefInReplacedY = yCoeffEq1 * reducedAbsoluteTermRelativeY;
+      double aCoefInReplacedY = coefY1 * reducedXCoefRelativeY;
+      double bCoefInReplacedY = coefY1 * reducedAbsoluteTermRelativeY;
 
       double finalACoef = aCoefInReplacedDoubledY + 1;
-      double finalBCoef =
-          bCoefInReplacedDoubledY + aCoefInReplacedY + xCoeffEq1;
+      double finalBCoef = bCoefInReplacedDoubledY + aCoefInReplacedY + coefX1;
       double finalCCoef =
-          cCoefInReplacedDoubledY + bCoefInReplacedY + totalAbsoluteTermEq1;
+          cCoefInReplacedDoubledY + bCoefInReplacedY + circleEquation1;
 
       double discriminant =
           finalBCoef * finalBCoef - 4 * finalACoef * finalCCoef;
@@ -327,24 +289,18 @@ class CanvasPainter extends CustomPainter {
     return <Offset>[p1, p2];
   }
 
-  List<Offset> getIntersectionOfLineAndCircle(Offset circleCenter,
-      int circleRadius, Offset linePoint1, Offset linePoint2) {
+  List<Offset> intersectLineAndCircle(Offset circleCenter, int circleRadius,
+      Offset linePoint1, Offset linePoint2) {
     Offset p1 = Offset(-1, -1);
     Offset p2 = Offset(-1, -1);
 
-    // Т.к. мы накладываем ортогональные окна,
-    // то у каждой прямой будут равны либо координаты по одной из осей
     if (linePoint1.dy == linePoint2.dy) {
       double y = linePoint1.dy;
 
-      // (x-1)^2 + (y-1)^2 = 3^2 -> x^2 - 2x + 1 + (y-1)^2 = 3^2
-      int xDoubledCoeff = 1; // x^2
-      int xSingleCoeff = 2 * (-circleCenter.dx.toInt()); // -1 * 2 * x = -2x
-      int xAbsoluteTerm =
-          (circleCenter.dx * circleCenter.dx).toInt(); // 1 * 1 = 1
+      int xDoubledCoeff = 1;
+      int xSingleCoeff = 2 * (-circleCenter.dx.toInt());
+      int xAbsoluteTerm = (circleCenter.dx * circleCenter.dx).toInt();
 
-      // x^2 - 2x + 1 + (3-1)^2 - 3^2 = 0
-      // x^2 - 2x - 4 = 0;
       int finalAbsoluteTerm = xAbsoluteTerm +
           pow(y - circleCenter.dy, 2).toInt() -
           pow(circleRadius, 2).toInt();
@@ -362,14 +318,10 @@ class CanvasPainter extends CustomPainter {
     } else if (linePoint1.dx == linePoint2.dy) {
       double x = linePoint1.dy;
 
-      // (x-1)^2 + (y-1)^2 = 3^2 -> (x-1)^2 + y^2 - 2y + 1 = 3^2
-      int yDoubledCoeff = 1; // x^2
-      int ySingleCoeff = 2 * (-circleCenter.dy.toInt()); // // -1 * 2 * x = -2x
-      int yAbsoluteTerm =
-          (circleCenter.dy * circleCenter.dy).toInt(); // 1 * 1 = 1
+      int yDoubledCoeff = 1;
+      int ySingleCoeff = 2 * (-circleCenter.dy.toInt());
+      int yAbsoluteTerm = (circleCenter.dy * circleCenter.dy).toInt();
 
-      // (2-1)^2 + y^2 - 2y + 1 - 3^2 = 0
-      // y^2 - 2y - 7 = 0;
       int finalAbsoluteTerm = yAbsoluteTerm +
           pow(x - circleCenter.dx, 2).toInt() -
           pow(circleRadius, 2).toInt();
@@ -385,19 +337,19 @@ class CanvasPainter extends CustomPainter {
         p2 = Offset(x.round().toDouble(), y2.round().toDouble());
       }
     }
+    List<Offset> res = <Offset>[];
+    if (p1 != Offset(-1, -1)) {
+      res.add(p1);
+    }
 
+    if (p2 != Offset(-1, -1)) {
+      res.add(p2);
+    }
     return <Offset>[p1, p2];
   }
 
-  //определение стороны по которую лежит точка относительно прямой, организованной 2мя точками
-  int orien(Offset a, Offset b, Offset c) {
-    //точка центра прмяой
+  int side(Offset a, Offset b, Offset c) {
     Offset m = Offset((a.dx + b.dx) / 2, (a.dy + b.dy) / 2);
-
-    //точка слева - 1
-    //точка справа - 2
-    //точка сверху - 4
-    //точка снизу - 8
 
     return (m.dx > c.dx ? 1 : 0) +
         (m.dx < c.dx ? 2 : 0) +
@@ -421,10 +373,10 @@ class CanvasPainter extends CustomPainter {
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
 
+    canvas.drawColor(Color(0xFFFFFFFF), BlendMode.color);
+
     clear();
 
-    //найти пересения, принимая, что на каждой итерации нижний и верхний слой целые и ничем ранее не перекрыты
-    //нахождение перекрытх частей окружностей окружностями (слои от 1 до 3 с слоями от 2 до 4)
     for (int i = 0; i < circles.length - 1; i++) {
       for (int j = 1 + i; j < circles.length; j++) {
         Offset circi = circles[i].center!;
@@ -432,25 +384,19 @@ class CanvasPainter extends CustomPainter {
         int radi = circles[i].radius!;
         int radj = circles[j].radius!;
 
-        List<Offset> mac =
-            getIntersectionOfTwoCircles(circi, radi, circj, radj);
+        List<Offset> mac = intersectTwoCircles(circi, radi, circj, radj);
 
-        // print(mac);
-
-        //если 2 точки пересечения
         if (mac[0] != Offset(-1, -1) && mac[1] != Offset(-1, -1)) {
           bool mod = false;
-          int x1 = orien(mac[0], mac[1], circj);
-          int x2 = orien(mac[0], mac[1], circi);
+          int x1 = side(mac[0], mac[1], circj);
+          int x2 = side(mac[0], mac[1], circi);
 
           if ((x1 & x2) != 0 && radi < radj) {
             mod = true;
           }
 
           circles[i].addArc(mac[0], mac[1], mod);
-        } else
-        //добавить добавление всей окружности если нижняя лежит полностю под верхней
-        if (radi <= radj &&
+        } else if (radi <= radj &&
             circi.dx >= (circj.dx - radj) &&
             circi.dx <= (circj.dy + radj) &&
             circi.dy >= (circj.dy - radj) &&
@@ -460,89 +406,132 @@ class CanvasPainter extends CustomPainter {
       }
     }
 
-    //нахождение перекрытых частей окружностей прямоугольниками (слои от 1 до 4 с слоями от 5 до 7)
-
-    //ДОБАВИТЬ ВЗАИМОДЕЙСТВИЕ МЕЖДУ ОКНАМИ И ОКРУЖНОСТЯМИ
     for (int i = 0; i < circles.length; i++) {
+      Circle currentCircle = circles[i];
+      Offset circleCenter = currentCircle.center!;
+      int circleRadius = currentCircle.radius!;
       for (int j = 0; j < rectangles.length; j++) {
-        //для стороны 1: верхней
-        Offset a =
-            Offset(rectangles[j].getOffset().dx, rectangles[j].getOffset().dy);
-        Offset b = Offset(
-            rectangles[j].getOffset().dx + rectangles[j].getWidht(),
-            rectangles[j].getOffset().dy);
-        List<Offset> mac = getIntersectionOfLineAndCircle(
-            circles[i].center!, circles[i].radius!, a, b);
+        List<Offset> macX = <Offset>[];
+        Rectangle currentRectangle = rectangles[j];
+        Offset recPoint = currentRectangle.start!;
+        int widht = currentRectangle.width!;
+        int height = currentRectangle.height!;
 
-        //для стороны 2 левой
-        a = Offset(rectangles[j].getOffset().dx, rectangles[j].getOffset().dy);
-        b = Offset(rectangles[j].getOffset().dx,
-            rectangles[j].getOffset().dy + rectangles[j].getHeight());
-        mac = getIntersectionOfLineAndCircle(
-            circles[i].center!, circles[i].getRadius(), a, b);
+        int macPrev = 0;
+        bool top, bottom, left, right;
 
-        //для стороны 3 нижней
-        a = Offset(rectangles[j].getOffset().dx,
-            rectangles[j].getOffset().dy + rectangles[j].getHeight());
-        b = Offset(rectangles[j].getOffset().dx + rectangles[j].getWidht(),
-            rectangles[j].getOffset().dy + rectangles[j].getHeight());
-        mac = getIntersectionOfLineAndCircle(
-            circles[i].center!, circles[i].getRadius(), a, b);
+        Offset a = Offset(recPoint.dx, recPoint.dy);
+        Offset b = Offset(recPoint.dx + widht, recPoint.dy);
 
-        //для стороны 4 правой
-        a = Offset(rectangles[j].getOffset().dx + rectangles[j].getWidht(),
-            rectangles[j].getOffset().dy);
-        b = Offset(rectangles[j].getOffset().dx + rectangles[j].getWidht(),
-            rectangles[j].getOffset().dy + rectangles[j].getHeight());
-        mac = getIntersectionOfLineAndCircle(
-            circles[i].center!, circles[i].getRadius(), a, b);
+        List<Offset> intersectcted =
+            intersectLineAndCircle(circleCenter, circleRadius, a, b);
+
+        for (var item in intersectcted) {
+          macX.add(item);
+        }
+        top = macPrev != macX.length;
+        macPrev = macX.length;
+
+        a = Offset(recPoint.dx, recPoint.dy);
+        b = Offset(recPoint.dx, recPoint.dy + height);
+        intersectcted =
+            intersectLineAndCircle(circleCenter, circleRadius, a, b);
+
+        for (var item in intersectcted) {
+          macX.add(item);
+        }
+
+        left = macPrev != macX.length;
+        macPrev = macX.length;
+
+        a = Offset(recPoint.dx, recPoint.dy + height);
+        b = Offset(recPoint.dx + widht, recPoint.dy + height);
+        intersectcted =
+            intersectLineAndCircle(circleCenter, circleRadius, a, b);
+
+        for (var item in intersectcted) {
+          macX.add(item);
+        }
+
+        bottom = macPrev != macX.length;
+        macPrev = macX.length;
+
+        a = Offset(recPoint.dx + widht, recPoint.dy);
+        b = Offset(recPoint.dx + widht, recPoint.dy + height);
+        intersectcted =
+            intersectLineAndCircle(circleCenter, circleRadius, a, b);
+
+        for (var item in intersectcted) {
+          macX.add(item);
+        }
+
+        right = macPrev != macX.length;
+
+        if (macX.isEmpty) {
+          if (packing(
+                  recPoint.dx.toInt(),
+                  recPoint.dx.toInt() + widht,
+                  recPoint.dy.toInt() + height,
+                  recPoint.dy.toInt(),
+                  circleCenter) !=
+              0) {
+            circles[i].addArcAllCircle();
+            break;
+          }
+        } else {
+          if (macX.length == 2) {
+            bool mod = false;
+            int x1 = side(macX[0], macX[1], circleCenter);
+            if (right) {
+              mod = x1 == 2;
+            } else if (left) {
+              mod = x1 == 1;
+            }
+            if (top) {
+              mod = x1 == 8;
+            }
+            if (bottom) {
+              mod = x1 == 4;
+            }
+
+            currentCircle.addArc(macX[0], macX[1], mod);
+          }
+        }
       }
     }
 
-    //нахождение перекрытых частей прямоугольников прямоугольниками (слои от 5 до 7 с слоями от 6 до 7)
     for (int i = 0; i < rectangles.length - 1; i++) {
-      //для каждой стороны рассматриваемого прямоугольника решаем задачу отчесения ортогональным окном
       for (int j = 1 + i; j < rectangles.length; j++) {
-        //для стороны 1: , Offset(_point.X + _width, _point.dy))
-        Offset a =
-            Offset(rectangles[i].getOffset().dx, rectangles[i].getOffset().dy);
-        Offset b = Offset(
-            rectangles[i].getOffset().dx + rectangles[i].getWidht(),
-            rectangles[i].getOffset().dy);
-        alClipping(a, b, i, rectangles[j]);
+        Offset a = Offset(rectangles[i].start!.dx, rectangles[i].start!.dy);
+        Offset b = Offset(rectangles[i].start!.dx + rectangles[i].width!,
+            rectangles[i].start!.dy);
+        findPart(a, b, i, rectangles[j]);
 
-        //для стороны 2 Offset(_point.X, _point.dy), Offset(_point.X, _point.dy + _height))
-        a = Offset(rectangles[i].getOffset().dx, rectangles[i].getOffset().dy);
-        b = Offset(rectangles[i].getOffset().dx,
-            rectangles[i].getOffset().dy + rectangles[i].getHeight());
-        alClipping(a, b, i, rectangles[j]);
+        a = Offset(rectangles[i].start!.dx, rectangles[i].start!.dy);
+        b = Offset(rectangles[i].start!.dx,
+            rectangles[i].start!.dy + rectangles[i].height!);
+        findPart(a, b, i, rectangles[j]);
 
-        //для стороны 3 Offset(_point.X, _point.dy + _height), Offset(_point.X + _width, _point.dy + _height)
-        a = Offset(rectangles[i].getOffset().dx,
-            rectangles[i].getOffset().dy + rectangles[i].getHeight());
-        b = Offset(rectangles[i].getOffset().dx + rectangles[i].getWidht(),
-            rectangles[i].getOffset().dy + rectangles[i].getHeight());
-        alClipping(a, b, i, rectangles[j]);
+        a = Offset(rectangles[i].start!.dx,
+            rectangles[i].start!.dy + rectangles[i].height!);
+        b = Offset(rectangles[i].start!.dx + rectangles[i].width!,
+            rectangles[i].start!.dy + rectangles[i].height!);
+        findPart(a, b, i, rectangles[j]);
 
-        //для стороны 4 (Offset(_point.X + _width, _point.dy), Offset(_point.X + _width, _point.dy + _height))
-        a = Offset(rectangles[i].getOffset().dx + rectangles[i].getWidht(),
-            rectangles[i].getOffset().dy);
-        b = Offset(rectangles[i].getOffset().dx + rectangles[i].getWidht(),
-            rectangles[i].getOffset().dy + rectangles[i].getHeight());
-        alClipping(a, b, i, rectangles[j]);
+        a = Offset(rectangles[i].start!.dx + rectangles[i].width!,
+            rectangles[i].start!.dy);
+        b = Offset(rectangles[i].start!.dx + rectangles[i].width!,
+            rectangles[i].start!.dy + rectangles[i].height!);
+        findPart(a, b, i, rectangles[j]);
       }
     }
 
-    //отрисовать видимые части
     for (int i = 0; i < circles.length; i++) {
       List<Arc> visibleArcs = circles[i].getVisible();
 
       for (var arc in visibleArcs) {
-        Rect rect = Rect.fromCenter(
-            center:
-                Offset(circles[i].getOffset().dx, circles[i].getOffset().dy),
-            width: circles[i].getRadius() * 2,
-            height: circles[i].getRadius() * 2);
+        Rect rect = Rect.fromLTWH(circles[i].center!.dx, circles[i].center!.dy,
+            circles[i].radius! * 2, circles[i].radius! * 2);
         canvas.drawArc(rect, arc.angle!, arc.length!, false, paint);
       }
     }
@@ -551,12 +540,10 @@ class CanvasPainter extends CustomPainter {
       List<PartRectangle> visibleParts = rectangles[i].getVisible();
 
       for (var part in visibleParts) {
-        canvas.drawLine(part.getStart(), part.getEnd(), paint);
+        canvas.drawLine(part.begin!, part.end!, paint);
       }
     }
 
-    //отрисовать перекрытые части
-    //если mode = 0, то добавить режим Б
     if (mode == 0) {
       final paintRed = Paint()
         ..color = Colors.red
@@ -564,20 +551,19 @@ class CanvasPainter extends CustomPainter {
         ..style = PaintingStyle.stroke;
 
       for (int i = 0; i < circles.length; i++) {
-        List<Arc> vis = circles[i].getArcs();
+        List<Arc> vis = circles[i].arcs;
 
         for (var v in vis) {
           Rect rect = Rect.fromCenter(
-              center:
-                  Offset(circles[i].getOffset().dx, circles[i].getOffset().dy),
-              width: circles[i].getRadius() * 2,
-              height: circles[i].getRadius() * 2);
+              center: Offset(circles[i].center!.dx, circles[i].center!.dy),
+              width: circles[i].radius! * 2,
+              height: circles[i].radius! * 2);
           canvas.drawArc(rect, v.angle!, v.length!, false, paintRed);
         }
       }
 
       for (int i = 0; i < rectangles.length; i++) {
-        List<PartRectangle> vis = rectangles[i].getParts();
+        List<PartRectangle> vis = rectangles[i].parts;
 
         for (var v in vis) {
           canvas.drawLine(v.getStart(), v.getEnd(), paintRed);

@@ -51,12 +51,9 @@ class Arc {
     } else if (angle == -90) {
       angle = 180;
     } else {
-      //1 квадрант
       if (angle > 0 && angle > 90) {
         angle = 450 - angle;
-      }
-      //2, 3, 4 квадрант
-      else {
+      } else {
         angle = 90 - angle;
       }
     }
@@ -72,34 +69,6 @@ class Circle {
 
   Circle({this.radius, this.center});
 
-  void Clear() {
-    arcs.clear();
-  }
-
-  //изменить радиус
-  void setRadius(int radius) {
-    radius = radius;
-  }
-
-  //изменить координату
-  void setOffset(Offset Offset) {
-    center = Offset;
-  }
-
-  Offset setCenter() {
-    return Offset(center!.dx + radius!, center!.dx + radius!);
-  }
-
-  //получить радиус
-  int getRadius() {
-    return radius!;
-  }
-
-  //получить координату
-  Offset getOffset() {
-    return center!;
-  }
-
   void clear() {
     arcs.clear();
   }
@@ -114,7 +83,6 @@ class Circle {
 
   void sort() {
     if (arcs.isNotEmpty) {
-      //объединить повторения
       arcs.sort(
           (Arc x, Arc y) => (x.angle!.round() == y.angle!.round()) ? 0 : 1);
 
@@ -135,10 +103,6 @@ class Circle {
     }
   }
 
-  List<Arc> getArcs() {
-    return arcs;
-  }
-
   List<Arc> getVisible() {
     List<Arc> drawingArcs = <Arc>[];
 
@@ -150,17 +114,12 @@ class Circle {
       return <Arc>[Arc(angle: 0, length: 360)];
     }
 
-    // Проверяем, пересекаются ли отрезки отрезаемых дуг
-    // Если пересекаются, то считается максимальный отрезаемый отрезок дуги
-    // И добавляется в массив
     for (int i = 0; i < arcs.length; i++) {
       bool isIncludedInExistedArcSegment = false;
       double curArcStartAngle = arcs[i].angle!;
       double curArcEndAngle = curArcStartAngle + arcs[i].length!;
 
       for (var arcSegment in maxArcSegments) {
-        // 173 (max) <= 185 (cur) && 193 (cur) <= 200 (max)
-        // 173 (max) <= 185 (cur) && 200 (cur) <= 200 (max)
         if (arcSegment[0] <= curArcStartAngle &&
             curArcEndAngle <= arcSegment[1]) {
           isIncludedInExistedArcSegment = true;
@@ -171,9 +130,7 @@ class Circle {
           arcSegment[0] = startAngleToadd;
           arcSegment[1] = endAngleToadd;
           break;
-        }
-        // 160 (cur) <= 173 (max) && 193 (cur) <= 200 (max)
-        else if (curArcStartAngle <= arcSegment[0] &&
+        } else if (curArcStartAngle <= arcSegment[0] &&
             curArcEndAngle <= arcSegment[1] &&
             curArcEndAngle > arcSegment[0]) {
           isIncludedInExistedArcSegment = true;
@@ -184,9 +141,7 @@ class Circle {
           arcSegment[0] = startAngleToadd;
           arcSegment[1] = endAngleToadd;
           break;
-        }
-        // 173 (max) <= 183 (cur) && 200 (max) <= 215 (cur)
-        else if (arcSegment[0] <= curArcStartAngle &&
+        } else if (arcSegment[0] <= curArcStartAngle &&
             arcSegment[1] <= curArcEndAngle &&
             arcSegment[1] > curArcStartAngle &&
             curArcEndAngle - 360 < arcSegment[1]) {
@@ -198,9 +153,7 @@ class Circle {
           arcSegment[0] = startAngleToadd;
           arcSegment[1] = endAngleToadd;
           break;
-        }
-        // 160 (cur) <= 173 (max) && 200 (max) <= 215 (cur)
-        else if (curArcStartAngle <= arcSegment[0] &&
+        } else if (curArcStartAngle <= arcSegment[0] &&
             arcSegment[1] <= curArcEndAngle) {
           isIncludedInExistedArcSegment = true;
 
@@ -213,8 +166,6 @@ class Circle {
         }
       }
 
-      // Если данный отрезок не пересёкся ни с каким из максимальных отрезков,
-      // то добавляем его в массив обрезаемых отрезков
       if (!isIncludedInExistedArcSegment) {
         List<double> newArcSegment = <double>[curArcStartAngle, curArcEndAngle];
         maxArcSegments.add(newArcSegment);
@@ -231,7 +182,6 @@ class Circle {
       }
     }
 
-    // Оптимизируем обрезаемые отрезки
     double finalStartAngle = maxArcSegments[0][0];
     double finalEndAngle = maxArcSegments[0][1];
     for (int i = 1; i < maxArcSegments.length; i++) {
@@ -265,7 +215,6 @@ class Circle {
       maxArcSegments[maxArcSegments.length - 1][1]
     ]);
 
-    // Проверяем ситуацию, если конец последней обрезаемой дуги будет > 360 градусов
     double lastArcEndAngle =
         optimizedMaxArcSegments[optimizedMaxArcSegments.length - 1][1];
     if (lastArcEndAngle > 360) {

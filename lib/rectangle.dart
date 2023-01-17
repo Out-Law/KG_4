@@ -34,33 +34,7 @@ class Rectangle {
     parts.clear();
   }
 
-  //изменить длину
-  void setWidht(int width) {
-    this.width = width;
-  }
-
-  //изменить высоту
-  void setHeight(int height) {
-    this.height = height;
-  }
-
-  //изменить координату начала
-  void setOffset(Offset start) {
-    this.start = start;
-  }
-
-  //получить длину
-  int getWidht() {
-    return width!;
-  }
-
-  //получить высоту
-  int getHeight() {
-    return height!;
-  }
-
-  //получить координату
-  Offset getOffset() {
+  Offset getStart() {
     return start!;
   }
 
@@ -72,10 +46,6 @@ class Rectangle {
     if (parts.isNotEmpty) {
       parts = parts.toSet().toList();
     }
-  }
-
-  List<PartRectangle> getParts() {
-    return parts;
   }
 
   List<PartRectangle> byX(
@@ -179,24 +149,18 @@ class Rectangle {
         Offset(start!.dx + width!, start!.dy + height!)));
 
     if (parts.isNotEmpty) {
-      for (var clip in parts) {
-        //левая граница
-        if (clip.getStart().dx == start!.dx && clip.getEnd().dx == start!.dx) {
-          byX(clip, result, start!.dx.toInt());
-        } else
-        //правая граница
-        if (clip.getStart().dx == start!.dx + width! &&
-            clip.getEnd().dx == start!.dx + width!) {
-          byX(clip, result, (start!.dx + width!.toDouble()).toInt());
-        } else
-        //вверхняя граница
-        if (clip.getStart().dy == start!.dy && clip.getEnd().dy == start!.dy) {
-          byY(clip, result, start!.dy.toInt());
-        } else
-        //нижняя граница
-        if (clip.getStart().dy == start!.dy + height! &&
-            clip.getEnd().dy == start!.dy + height!) {
-          byY(clip, result, (start!.dy + height!.toDouble()).toInt());
+      for (var part in parts) {
+        if (part.getStart().dx == start!.dx && part.getEnd().dx == start!.dx) {
+          byX(part, result, start!.dx.toInt());
+        } else if (part.getStart().dx == start!.dx + width! &&
+            part.getEnd().dx == start!.dx + width!) {
+          byX(part, result, (start!.dx + width!.toDouble()).toInt());
+        } else if (part.getStart().dy == start!.dy &&
+            part.getEnd().dy == start!.dy) {
+          byY(part, result, start!.dy.toInt());
+        } else if (part.getStart().dy == start!.dy + height! &&
+            part.getEnd().dy == start!.dy + height!) {
+          byY(part, result, (start!.dy + height!.toDouble()).toInt());
         }
       }
     }
