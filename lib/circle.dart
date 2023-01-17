@@ -140,45 +140,171 @@ class Circle {
   }
 
   List<Arc> getVisible() {
-    List<Arc> result = <Arc>[];
+    List<Arc> drawingArcs = <Arc>[];
 
-    double startOfDrawingArc;
-    double lengthOfDrawingArc;
+    List<List<double>> maxArcSegments = <List<double>>[];
 
-    double a, b;
+    List<List<double>> optimizedMaxArcSegments = <List<double>>[];
 
-    if (arcs.isNotEmpty) {
-      for (int i = 1; i < arcs.length; i++) {
-        startOfDrawingArc = arcs[i - 1].angle! + arcs[i - 1].length! + 0.1;
-        lengthOfDrawingArc = arcs[i].angle! - 0.1 - startOfDrawingArc;
+    if (arcs.isEmpty) {
+      return <Arc>[Arc(angle: 0, length: 360)];
+    }
 
-        if (lengthOfDrawingArc < 0) {
-          a = startOfDrawingArc + lengthOfDrawingArc;
-          b = -lengthOfDrawingArc;
+    // Проверяем, пересекаются ли отрезки отрезаемых дуг
+    // Если пересекаются, то считается максимальный отрезаемый отрезок дуги
+    // И добавляется в массив
+    for (int i = 0; i < arcs.length; i++) {
+      bool isIncludedInExistedArcSegment = false;
+      double curArcStartAngle = arcs[i].angle!;
+      double curArcEndAngle = curArcStartAngle + arcs[i].length!;
 
-          result.add(Arc(angle: a, length: b));
-        } else {
-          result.add(Arc(angle: startOfDrawingArc, length: lengthOfDrawingArc));
+      for (var arcSegment in maxArcSegments) {
+        // 173 (max) <= 185 (cur) && 193 (cur) <= 200 (max)
+        // 173 (max) <= 185 (cur) && 200 (cur) <= 200 (max)
+        if (arcSegment[0] <= curArcStartAngle &&
+            curArcEndAngle <= arcSegment[1]) {
+          isIncludedInExistedArcSegment = true;
+
+          double startAngleToadd = arcSegment[0];
+          double endAngleToadd = arcSegment[1];
+
+          arcSegment[0] = startAngleToadd;
+          arcSegment[1] = endAngleToadd;
+          break;
+        }
+        // 160 (cur) <= 173 (max) && 193 (cur) <= 200 (max)
+        else if (curArcStartAngle <= arcSegment[0] &&
+            curArcEndAngle <= arcSegment[1] &&
+            curArcEndAngle > arcSegment[0]) {
+          isIncludedInExistedArcSegment = true;
+
+          double startAngleToadd = curArcStartAngle;
+          double endAngleToadd = arcSegment[1];
+
+          arcSegment[0] = startAngleToadd;
+          arcSegment[1] = endAngleToadd;
+          break;
+        }
+        // 173 (max) <= 183 (cur) && 200 (max) <= 215 (cur)
+        else if (arcSegment[0] <= curArcStartAngle &&
+            arcSegment[1] <= curArcEndAngle &&
+            arcSegment[1] > curArcStartAngle &&
+            curArcEndAngle - 360 < arcSegment[1]) {
+          isIncludedInExistedArcSegment = true;
+
+          double startAngleToadd = arcSegment[0];
+          double endAngleToadd = curArcEndAngle;
+
+          arcSegment[0] = startAngleToadd;
+          arcSegment[1] = endAngleToadd;
+          break;
+        }
+        // 160 (cur) <= 173 (max) && 200 (max) <= 215 (cur)
+        else if (curArcStartAngle <= arcSegment[0] &&
+            arcSegment[1] <= curArcEndAngle) {
+          isIncludedInExistedArcSegment = true;
+
+          double startAngleToadd = curArcStartAngle;
+          double endAngleToadd = curArcEndAngle;
+
+          arcSegment[0] = startAngleToadd;
+          arcSegment[1] = endAngleToadd;
+          break;
         }
       }
 
-      double startOfLastDrawingArc =
-          arcs[arcs.length - 1].angle! + arcs[arcs.length - 1].length! + 0.1;
-      double lengthOfLastDrawingArc = 360 - startOfLastDrawingArc;
+      // Если данный отрезок не пересёкся ни с каким из максимальных отрезков,
+      // то добавляем его в массив обрезаемых отрезков
+      if (!isIncludedInExistedArcSegment) {
+        List<double> newArcSegment = <double>[curArcStartAngle, curArcEndAngle];
+        maxArcSegments.add(newArcSegment);
+      }
+    }
 
-      result.add(
-          Arc(angle: startOfLastDrawingArc, length: lengthOfLastDrawingArc));
+    for (int i = 0; i < maxArcSegments.length; i++) {
+      for (int j = i; j < maxArcSegments.length; j++) {
+        if (maxArcSegments[i][0] > maxArcSegments[j][0]) {
+          List<double> tmp = maxArcSegments[i];
+          maxArcSegments[i] = maxArcSegments[j];
+          maxArcSegments[j] = tmp;
+        }
+      }
+    }
 
-      if (arcs[0].angle! != 0.0) {
-        startOfLastDrawingArc = 0.0;
-        lengthOfLastDrawingArc = arcs[0].angle! - 0.1;
+    // Оптимизируем обрезаемые отрезки
+    double finalStartAngle = maxArcSegments[0][0];
+    double finalEndAngle = maxArcSegments[0][1];
+    for (int i = 1; i < maxArcSegments.length; i++) {
+      bool somethingChanges = false;
 
-        result.add(
-            Arc(angle: startOfLastDrawingArc, length: lengthOfLastDrawingArc));
+      if (finalStartAngle > maxArcSegments[i][0]) {
+        somethingChanges = true;
+        finalStartAngle = maxArcSegments[i][0];
+      }
+
+      if (finalEndAngle >= maxArcSegments[i][0] &&
+          finalEndAngle <= maxArcSegments[i][1]) {
+        somethingChanges = true;
+        finalEndAngle = maxArcSegments[i][1];
+      }
+
+      if ((!somethingChanges && finalStartAngle != finalEndAngle) ||
+          i + 1 == maxArcSegments.length) {
+        List<double> newOptimizedArcSegment = <double>[
+          finalStartAngle,
+          finalEndAngle
+        ];
+        finalStartAngle = finalEndAngle;
+
+        optimizedMaxArcSegments.add(newOptimizedArcSegment);
+      }
+    }
+
+    optimizedMaxArcSegments.add(<double>[
+      maxArcSegments[maxArcSegments.length - 1][0],
+      maxArcSegments[maxArcSegments.length - 1][1]
+    ]);
+
+    // Проверяем ситуацию, если конец последней обрезаемой дуги будет > 360 градусов
+    double lastArcEndAngle =
+        optimizedMaxArcSegments[optimizedMaxArcSegments.length - 1][1];
+    if (lastArcEndAngle > 360) {
+      optimizedMaxArcSegments[optimizedMaxArcSegments.length - 1][1] =
+          optimizedMaxArcSegments[optimizedMaxArcSegments.length - 1][1] - 360;
+    }
+
+    double startAngle = optimizedMaxArcSegments[0][0];
+    double endAngle = optimizedMaxArcSegments[0][1];
+
+    if (optimizedMaxArcSegments.length != 1) {
+      for (int i = 1; i < optimizedMaxArcSegments.length; i++) {
+        if (optimizedMaxArcSegments[i][0] - endAngle > 0) {
+          drawingArcs.add(Arc(
+              angle: endAngle,
+              length: (optimizedMaxArcSegments[i][0] - endAngle)));
+        } else {
+          drawingArcs.add(Arc(
+              angle: endAngle,
+              length: (optimizedMaxArcSegments[i][0] - endAngle + 360)));
+        }
+        endAngle = optimizedMaxArcSegments[i][1];
+      }
+
+      if (startAngle - endAngle > 0) {
+        drawingArcs.add(Arc(angle: endAngle, length: (startAngle - endAngle)));
+      } else {
+        drawingArcs
+            .add(Arc(angle: endAngle, length: (startAngle - endAngle + 360)));
       }
     } else {
-      result.add(Arc(angle: 0, length: 360));
+      if ((360 + startAngle - endAngle) <= 360) {
+        drawingArcs
+            .add(Arc(angle: endAngle, length: (360 + startAngle - endAngle)));
+      } else {
+        drawingArcs.add(Arc(angle: endAngle, length: (startAngle - endAngle)));
+      }
     }
-    return result;
+
+    return drawingArcs;
   }
 }
